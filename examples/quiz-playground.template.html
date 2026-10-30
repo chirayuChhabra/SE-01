@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz playground</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--foreground); font-family: var(--font-sans, system-ui, sans-serif); font-size: 14px; line-height: 1.5; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button, select, input, textarea { border: 1px solid var(--border); border-radius: var(--radius, 8px); background: var(--card); }
+button { cursor: pointer; padding: 10px 15px; font-weight: 600; }
+button:hover:not(:disabled) { background: var(--secondary); }
+button:disabled { opacity: .45; cursor: default; }
+button.primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+select { padding: 8px; width: 100%; min-width: 0; }
+.toolbar { display: grid; grid-template-columns: 1fr 1.5fr auto; align-items: end; gap: 12px; }
+.toolbar label { display: grid; gap: 5px; color: var(--muted-foreground); font-size: 12px; }
+.toolbar label select { color: var(--foreground); font-size: 13px; }
+.meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 22px 0 9px; color: var(--muted-foreground); font-size: 12px; }
+.progress { display: flex; gap: 5px; margin-bottom: 24px; }
+.progress span { height: 4px; flex: 1; border-radius: 3px; background: var(--secondary); }
+.progress .done { background: var(--success); }
+.progress .current { background: var(--primary); }
+h1 { font-size: clamp(21px, 4vw, 28px); line-height: 1.3; letter-spacing: -.5px; font-weight: 650; margin: 0 0 20px; max-width: 34ch; }
+.options { display: grid; gap: 9px; }
+.option { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--border); border-radius: var(--radius, 8px); cursor: pointer; }
+.option:has(input:checked) { border-color: var(--primary); background: var(--accent); }
+.option input { accent-color: var(--primary); width: 17px; height: 17px; margin: 0; flex: 0 0 auto; }
+.option span { font-size: 18px; }
+.entry { width: 100%; padding: 13px 14px; font-size: 18px; }
+textarea.entry { font-size: 15px; resize: vertical; min-height: 110px; }
+.help { margin: 8px 0 0; font-size: 12px; color: var(--muted-foreground); }
+.matchrow { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 12px; margin-bottom: 10px; }
+.matchrow span { font-size: 18px; }
+.orderrow { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); padding: 10px 0; }
+.orderrow .number { color: var(--muted-foreground); width: 20px; }
+.orderrow .text { flex: 1; }
+.orderrow button { padding: 5px 10px; }
+.notice { padding: 12px 15px; margin: 14px 0; border-radius: var(--radius, 8px); background: var(--secondary); }
+.notice.correct { color: var(--success); }
+.notice.incorrect, .notice.error { color: var(--destructive); }
+.notice.partial { color: var(--warning); }
+.notice strong { display: block; }
+.notice p { margin: 5px 0 0; color: var(--foreground); }
+.actions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 20px; }
+.bottom { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 24px; padding-top: 14px; font-size: 12px; color: var(--muted-foreground); }
+.bottom button { padding: 5px 10px; font-size: 12px; }
+details { margin-top: 18px; font-size: 12px; color: var(--muted-foreground); }
+summary { cursor: pointer; }
+pre { overflow: auto; max-height: 220px; border-radius: var(--radius, 8px); background: var(--code-background, var(--secondary)); padding: 12px; font-size: 11px; color: var(--foreground); }
+.result { padding: 24px 0; }
+.result .score { font-size: 48px; font-weight: 650; letter-spacing: -2px; }
+.review { padding: 12px 0; border-top: 1px solid var(--border); }
+.review p { margin: 4px 0; }
+[hidden] { display: none !important; }
+@media(max-width: 480px) { .toolbar { grid-template-columns: 1fr 1fr; } .toolbar button { grid-column: 1 / -1; } .actions button { flex: 1; padding-inline: 10px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="toolbar">
+    <label>Session mode<select id="mode"><option value="practice">Practice · hints & retries</option><option value="diagnostic">Diagnostic · one attempt</option><option value="assessment">Test · results at the end</option></select></label>
+    <label>Try a question type<select id="scope"><option value="all">Full fractions quiz · 8 questions</option></select></label>
+    <button id="restart">Start fresh</button>
+  </div>
+  <div class="meta"><span id="position">Loading quiz…</span><span id="score"></span></div>
+  <div id="progress" class="progress" aria-label="Quiz progress"></div>
+  <section id="question-area" aria-label="Current question">
+    <h1 id="prompt"></h1>
+    <form id="answer-form">
+      <div id="answer-input"></div>
+      <div id="hint-area" aria-live="polite"></div>
+      <div id="feedback" aria-live="polite"></div>
+      <div id="error" class="notice error" role="alert" hidden></div>
+      <div class="actions"><button type="submit" id="check" class="primary">Check answer</button><button type="button" id="hint">Show hint</button><button type="button" id="next">Continue</button></div>
+    </form>
+  </section>
+  <section id="results" hidden aria-label="Quiz results"></section>
+  <div class="bottom"><span id="saved" role="status"></span><button id="resume">Reopen saved session</button></div>
+  <details><summary>See the saved answer evidence</summary><pre id="evidence">[]</pre></details>
+</main>
+<script>
+/* QUIZ_ENGINE */
+const fixture = /* QUIZ_FIXTURE */ null;
+const $ = id => document.getElementById(id);
+// The inline playground supplies theme tokens; a downloaded file uses these defaults.
+if (!getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()) {
+  const defaults = { '--foreground': '#17233b', '--muted-foreground': '#526079', '--card': '#ffffff', '--border': '#ccd5e4', '--secondary': '#edf1f7', '--primary': '#2756bb', '--primary-foreground': '#ffffff', '--accent': '#eaf0ff', '--ring': '#517fe1', '--success': '#20704b', '--warning': '#825a08', '--destructive': '#b33333', '--radius': '8px' };
+  Object.entries(defaults).forEach(([name, value]) => document.documentElement.style.setProperty(name, value));
+  document.body.style.padding = '24px';
+  document.querySelector('main').style.maxWidth = '760px';
+  document.querySelector('main').style.margin = '0 auto';
+}
+const typeLabels = { 'single-choice': 'Single choice', 'multiple-select': 'Multiple select', numeric: 'Numeric answer', fraction: 'Fraction answer', matching: 'Matching', ordering: 'Put in order', reflection: 'Written reflection' };
+fixture.questions.forEach(q => { const option = document.createElement('option'); option.value = q.id; option.textContent = typeLabels[q.type] + (q.id === 'simplify-half' ? ' · simplest form' : ''); $('scope').append(option); });
+const memory = new Map();
+let storage, persistent = false, session, currentQuiz, busy = false, order = [], renderedId = '', run = 0, restored = false;
+try {
+  const probe = 'se01:playground:probe';
+  window.localStorage.setItem(probe, '1'); window.localStorage.removeItem(probe);
+  storage = browserStorage(window.localStorage); persistent = true;
+} catch {
+  storage = { async load(key) { return structuredClone(memory.get(key) ?? null); }, async save(key, value) { memory.set(key, structuredClone(value)); } };
+}
+const idFactory = () => globalThis.crypto?.randomUUID?.() ?? `playground-${Date.now()}-${++run}-${Math.random().toString(36).slice(2)}`;
+let options;
+function el(tag, text, className) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
+function showError(error) { $('error').textContent = error.message; $('error').hidden = false; }
+function saveLabel() { return persistent ? 'Saved on this device' : 'Saved for this preview · kept while it stays open'; }
+async function start(fresh = false) {
+  restored = false;
+  const scope = $('scope').value, mode = $('mode').value;
+  currentQuiz = structuredClone(fixture);
+  if (scope !== 'all') currentQuiz.questions = currentQuiz.questions.filter(q => q.id === scope);
+  currentQuiz.id += ':' + scope;
+  const key = `se01:quiz-playground:v1:${scope}:${mode}`;
+  if (fresh) await storage.save(key, null);
+  options = { quiz: currentQuiz, mode, key, identity: { studentId: 'playground-student', deviceId: 'playground', sessionId: key }, storage, idFactory };
+  session = await openQuizSession(options);
+  renderedId = ''; render();
+}
+function inputs(q) {
+  $('answer-input').replaceChildren();
+  if (q.type === 'single-choice' || q.type === 'multiple-select') {
+    const list = el('div', undefined, 'options');
+    q.options.forEach(o => { const label = el('label', undefined, 'option'); const input = el('input'); input.type = q.type === 'single-choice' ? 'radio' : 'checkbox'; input.name = 'selection'; input.value = o.id; label.append(input, el('span', o.label)); list.append(label); });
+    $('answer-input').append(list);
+    if (q.type === 'multiple-select') $('answer-input').append(el('p', 'Select all answers that apply. Incorrect selections reduce partial credit.', 'help'));
+  } else if (q.type === 'numeric' || q.type === 'fraction') {
+    const input = el('input'); input.id = 'entry'; input.className = 'entry'; input.autocomplete = 'off'; input.setAttribute('aria-label', 'Your answer'); input.placeholder = q.type === 'fraction' ? 'e.g. 2/4' : 'Type a number';
+    if (q.type === 'numeric') input.inputMode = 'decimal';
+    $('answer-input').append(input);
+    if (q.type === 'fraction') $('answer-input').append(el('p', 'Use numerator/denominator. Equivalent fractions are checked exactly.', 'help'));
+  } else if (q.type === 'reflection') {
+    const textarea = el('textarea'); textarea.id = 'entry'; textarea.className = 'entry'; textarea.maxLength = 10000; textarea.setAttribute('aria-label', 'Your explanation'); textarea.placeholder = 'Explain in your own words…'; $('answer-input').append(textarea, el('p', 'Saved for review. This response does not change your score.', 'help'));
+  } else if (q.type === 'matching') {
+    q.left.forEach(left => { const row = el('label', undefined, 'matchrow'); const select = el('select'); select.dataset.left = left.id; select.append(new Option('Choose a match', '')); q.right.forEach(right => select.append(new Option(right.label, right.id))); row.append(el('span', left.label), select); $('answer-input').append(row); });
+  } else if (q.type === 'ordering') {
+    order = q.items.map(item => item.id); drawOrder(q);
+  }
+}
+function drawOrder(q) {
+  $('answer-input').replaceChildren();
+  order.forEach((id, index) => {
+    const item = q.items.find(item => item.id === id), row = el('div', undefined, 'orderrow');
+    row.append(el('span', String(index + 1), 'number'), el('span', item.label, 'text'));
+    for (const [label, delta] of [['↑', -1], ['↓', 1]]) {
+      const button = el('button', label); button.type = 'button'; button.dataset.boundary = String(index + delta < 0 || index + delta >= order.length); button.disabled = button.dataset.boundary === 'true'; button.setAttribute('aria-label', `${delta < 0 ? 'Move up' : 'Move down'}: ${item.label}`);
+      button.addEventListener('click', () => { [order[index], order[index + delta]] = [order[index + delta], order[index]]; drawOrder(q); }); row.append(button);
+    }
+    $('answer-input').append(row);
+  });
+  $('answer-input').append(el('p', 'Use the arrow buttons to arrange the steps.', 'help'));
+}
+function response(q) {
+  if (q.type === 'single-choice') { const checked = document.querySelector('input[name="selection"]:checked'); if (!checked) throw new Error('Choose an answer first.'); return checked.value; }
+  if (q.type === 'multiple-select') { const values = [...document.querySelectorAll('input[name="selection"]:checked')].map(i => i.value); if (!values.length) throw new Error('Choose at least one answer.'); return values; }
+  if (q.type === 'numeric') return { value: $('entry').value };
+  if (q.type === 'fraction' || q.type === 'reflection') return $('entry').value;
+  if (q.type === 'ordering') return [...order];
+  return Object.fromEntries([...document.querySelectorAll('[data-left]')].map(select => [select.dataset.left, select.value]));
+}
+function render() {
+  const v = session.view(), q = v.question;
+  $('question-area').hidden = v.completed; $('results').hidden = !v.completed;
+  $('position').textContent = v.completed ? 'Quiz complete' : `Question ${v.questionIndex + 1} of ${currentQuiz.questions.length} · ${typeLabels[q.type]}`;
+  $('score').textContent = v.summary ? `${Number(v.summary.earnedPoints.toFixed(2))} / ${v.summary.maxPoints} points` : 'Results at the end';
+  $('progress').replaceChildren(...currentQuiz.questions.map((_, i) => el('span', undefined, v.completed || i < v.questionIndex ? 'done' : i === v.questionIndex ? 'current' : '')));
+  if (renderedId !== q.id) { $('prompt').textContent = q.prompt; inputs(q); renderedId = q.id; }
+  $('hint-area').replaceChildren(...v.hints.map((hint, i) => el('div', `Hint ${i + 1}: ${hint}`, 'notice')));
+  $('feedback').replaceChildren();
+  if (v.feedback) { const box = el('div', undefined, 'notice ' + v.feedback.status); box.append(el('strong', v.feedback.feedback)); if (v.feedback.credit !== null) box.append(el('p', `${Number(v.feedback.earnedPoints.toFixed(2))} / ${v.feedback.maxPoints} points`)); if (v.explanation) box.append(el('p', v.explanation)); $('feedback').append(box); }
+  else if (v.attemptsUsed) $('feedback').append(el('div', 'Answer saved. Your results will appear when you finish.', 'notice'));
+  $('check').disabled = !v.canSubmit || busy; $('check').textContent = v.attemptsUsed ? 'Try again' : q.type === 'reflection' ? 'Save response' : v.mode === 'practice' ? 'Check answer' : 'Submit answer';
+  $('hint').hidden = v.mode !== 'practice' || !(currentQuiz.questions[v.questionIndex].hints?.length);
+  $('hint').disabled = !v.canHint || busy;
+  $('next').disabled = !v.canContinue || busy; $('next').textContent = v.questionIndex === currentQuiz.questions.length - 1 ? 'Finish quiz' : 'Continue';
+  for (const input of $('answer-input').querySelectorAll('input, textarea, select, button')) input.disabled = !v.canSubmit || busy || input.dataset.boundary === 'true';
+  $('saved').textContent = restored ? 'Saved session reopened · progress restored' : saveLabel();
+  const canInspect = v.mode === 'practice' || v.completed;
+  $('evidence').textContent = canInspect ? JSON.stringify(session.exportEvidence(), null, 2) : 'Answer evidence is hidden until this session is complete.';
+  if (v.completed) {
+    $('results').replaceChildren();
+    const s = v.summary, result = el('div', undefined, 'result');
+    result.append(el('h1', 'Practice makes progress.'), el('div', s.percentage === null ? 'Recorded' : `${Math.round(s.percentage)}%`, 'score'), el('p', `${s.earnedPoints.toFixed(2).replace(/\.00$/, '')} of ${s.maxPoints} points. ${s.independentCorrect} correct on the first attempt without hints.`));
+    if (s.ungradedResponses) result.append(el('p', `${s.ungradedResponses} written response saved for review.`));
+    $('results').append(result);
+    for (const question of currentQuiz.questions) { const latest = session.exportEvidence().filter(a => a.questionId === question.id).at(-1); const row = el('div', undefined, 'review'); row.append(el('strong', question.prompt), el('p', latest.result.feedback)); if (question.explanation) row.append(el('p', question.explanation)); $('results').append(row); }
+  }
+}
+async function perform(action, rebuild = false) {
+  if (busy) return;
+  busy = true; restored = false; $('error').hidden = true;
+  for (const control of document.querySelectorAll('button, .toolbar select')) control.disabled = true;
+  try { await action(); if (rebuild) renderedId = ''; render(); } catch (error) { showError(error); }
+  finally { busy = false; if (session) render(); $('restart').disabled = false; $('resume').disabled = false; $('mode').disabled = false; $('scope').disabled = false; }
+}
+$('answer-form').addEventListener('submit', event => { event.preventDefault(); perform(() => session.submit(response(session.view().question))); });
+$('hint').addEventListener('click', () => perform(() => session.hint()));
+$('next').addEventListener('click', () => perform(() => session.next(), true));
+$('restart').addEventListener('click', () => perform(() => start(true), true));
+$('mode').addEventListener('change', () => perform(() => start(), true));
+$('scope').addEventListener('change', () => perform(() => start(), true));
+$('resume').addEventListener('click', () => perform(async () => { session = await openQuizSession(options); renderedId = ''; restored = true; }));
+start().catch(showError);
+</script>
+</body>
+</html>

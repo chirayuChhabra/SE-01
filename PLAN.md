@@ -2,7 +2,7 @@
 
 **Goal:** Students download a lesson, learn offline, and get practice suited to their answers. Teachers see progress when students reconnect.
 
-**Where we are:** Planning is done at a high level. There is no application code yet.
+**Where we are:** The standalone [quiz engine](docs/quiz-engine.md) now validates and scores seven question types and persists resumable sessions through a storage adapter. A fractions quiz fixture and tests are included. The student player, app caching, adaptation, and target-device offline checks are still pending.
 
 ## Now: make one lesson work offline
 
@@ -15,7 +15,7 @@ Use **Class 6 equivalent fractions** as the working example until the curriculum
 
 **This step is finished when:** two test students follow different paths through the same lesson, and both can resume offline without losing answers.
 
-**Immediate next task:** write the sample lesson and its answers. Use that real example to decide how lesson data should be stored and checked.
+**Immediate next task:** connect the Markdown lesson player to the [quiz contract](docs/quiz-engine.md#plugging-into-the-lesson-player), review the fractions fixture, and test save/reopen on the intended device. The quiz module does not require or implement Markdown conversion.
 
 ## Next: turn the lesson into a chapter
 
