@@ -1,6 +1,20 @@
 # SE-01 — Offline Adaptive Learning LMS
 
-Initial concept brief · 30 October 2026
+Working concept and proposed product direction · 30 October 2026
+
+## Current direction and documentation
+
+**A teacher provides an ordinary lesson. Online AI prepares adaptive material for review. Students download the published pack, learn and adapt offline, then sync progress when connected.**
+
+We assume teachers can access internet during preparation; the challenge brief does not guarantee this. The proposed first platform is a responsive, installable web app, subject to target-device testing. No application has been implemented yet.
+
+Read the detailed proposals in this order:
+
+1. [Product plan](docs/product-plan.md) — experiences, lifecycle, connectivity, and scope.
+2. [Content and authoring](docs/content-and-authoring.md) — lessons, customisation, assessment, simulations, and standards.
+3. [AI preparation pipeline](docs/ai-preparation.md) — generation stages, validation, review, and bulk-generation limits.
+4. [Architecture](docs/architecture.md) — components, contracts, offline storage, and sync.
+5. [Delivery plan](docs/delivery-plan.md) — build sequence, acceptance scenarios, and open decisions.
 
 ## The problem we want to solve
 
@@ -48,7 +62,7 @@ The limitations below are questions to investigate in existing systems, not clai
 
 **Issue to investigate:** Requiring an LLM for every recommendation would make offline learning dependent on connectivity and introduce content quality concerns.
 
-**Our answer:** Begin with predefined, reviewed material and a transparent local adaptation engine. Online AI may later help prepare explanations or assemble packs, subject to review. AI is optional for the first version; the offline learning loop must work without it.
+**Our answer:** Use online AI during teacher preparation to produce explanations, questions, hints, translations, and supported simulation settings. Validate and review this material before publishing a fixed pack. A transparent local engine selects downloaded activities; the student's offline learning loop does not call AI.
 
 ### 7. Does completing a lesson mean understanding it?
 
@@ -88,10 +102,11 @@ The limitations below are questions to investigate in existing systems, not clai
 
 ## What we can make
 
-An offline-capable LMS with two connected experiences:
+An offline-capable LMS with three connected experiences:
 
 - **Student experience:** Download chapters, take a diagnostic, learn through lessons and simulations, practise, take quizzes or tests, and receive an evolving learning path.
-- **Teacher experience:** Review synced skill profiles, identify shared learning gaps, and choose where to help.
+- **Content Studio:** Provide a lesson, generate adaptations, edit and review drafts, and publish an offline pack.
+- **Teacher experience:** Manage classes and assignments, review synced skill profiles, identify shared learning gaps, and prepare follow-up material.
 
 The first connection provisions the learning pack. From then on, the student can learn and adapt within that pack without a connection. Later connections upload progress and download content updates or additional packs.
 
@@ -122,7 +137,8 @@ Include:
 
 - A small skill map with explicit prerequisites.
 - A short diagnostic and a visible skill profile.
-- Predefined material across multiple levels.
+- Teacher lesson intake and bounded AI preparation, with editing, review, and publication.
+- Reviewed, packaged material across multiple levels.
 - At least one purposeful interactive simulation.
 - Adaptive practice, quizzes, and a chapter assessment.
 - Local progress storage and retry-safe synchronisation.
@@ -130,10 +146,11 @@ Include:
 - A teacher view that identifies students needing help with particular concepts.
 - Two reproducible simulated student journeys demonstrating different paths.
 
-Defer broad curriculum coverage, live classes, social features, automatic AI content generation, and high-stakes exam security until the core learning loop works.
+Defer broad curriculum coverage, live classes, social features, unrestricted AI-generated simulation code, unreviewed automatic publication, and high-stakes exam security until the core learning loop works.
 
 ## What would make the demo convincing?
 
+- Show a teacher providing a lesson, reviewing AI-generated adaptations, and publishing and assigning a pack.
 - After downloading the pack, disconnect the device and complete a learning session.
 - Show two students receiving different activities because of different skill evidence.
 - Show a struggling student receiving prerequisite support and later progressing.
