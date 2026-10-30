@@ -1,6 +1,8 @@
 # SE-01 — Detailed implementation checklist
 
-Proposed roadmap · 30 October 2026 · No application code exists yet.
+Proposed roadmap · 30 October 2026 · Quiz module implemented; other components remain planned.
+
+Implementation reference: [quiz engine](quiz-engine.md). It supplies question validation, seven scorers, fixed-order practice/diagnostic/assessment sessions, and an adapter for persisted evidence. Stage 2 still needs subject review and integration; this does not complete the broader content contract or student player.
 
 This is our execution checklist: what to build, in which order, which features belong to each engine, and how we know a stage is finished. Use the [architecture](architecture.md), [content requirements](content-and-authoring.md), and [AI pipeline](ai-preparation.md) for deeper specifications.
 

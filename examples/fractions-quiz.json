@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "equivalent-fractions",
+  "revision": "1",
+  "title": "Equivalent fractions — practice",
+  "language": "en",
+  "questions": [
+    {
+      "id": "recognise-half", "revision": "1", "type": "single-choice",
+      "prompt": "Which fraction is equivalent to 1/2?", "skills": ["fractions.equivalence"], "points": 1,
+      "options": [{ "id": "a", "label": "2/4" }, { "id": "b", "label": "1/4" }, { "id": "c", "label": "2/3" }],
+      "answer": { "optionId": "a" }, "hints": ["Multiply both the numerator and denominator by the same number."],
+      "explanation": "Multiplying both parts of 1/2 by 2 gives 2/4. The quantity stays the same."
+    },
+    {
+      "id": "select-halves", "revision": "1", "type": "multiple-select",
+      "prompt": "Select every fraction equivalent to 1/2.", "skills": ["fractions.equivalence"], "points": 2,
+      "options": [{ "id": "a", "label": "2/4" }, { "id": "b", "label": "3/6" }, { "id": "c", "label": "2/6" }],
+      "answer": { "optionIds": ["a", "b"], "scoring": "partial" },
+      "hints": ["In a fraction equal to one-half, the denominator is twice the numerator."],
+      "explanation": "2/4 and 3/6 each simplify to 1/2. 2/6 simplifies to 1/3."
+    },
+    {
+      "id": "missing-numerator", "revision": "1", "type": "numeric",
+      "prompt": "Complete the equivalent fraction: 1/2 = ?/8.", "skills": ["fractions.equivalence"], "points": 1,
+      "answer": { "value": 4, "absoluteTolerance": 0 }, "hints": ["2 × 4 = 8. Multiply the numerator by 4 too."],
+      "explanation": "1 × 4 = 4, so 1/2 = 4/8."
+    },
+    {
+      "id": "write-equivalent", "revision": "1", "type": "fraction",
+      "prompt": "Write a fraction equal to one-half. Use numerator/denominator.", "skills": ["fractions.equivalence"], "points": 1,
+      "answer": { "numerator": 1, "denominator": 2, "requireSimplest": false },
+      "hints": ["Try multiplying both parts of 1/2 by the same positive integer."],
+      "explanation": "1/2, 2/4, and 3/6 all represent the same quantity."
+    },
+    {
+      "id": "simplify-half", "revision": "1", "type": "fraction",
+      "prompt": "Write 6/12 in simplest form.", "skills": ["fractions.simplification"], "points": 1,
+      "answer": { "numerator": 1, "denominator": 2, "requireSimplest": true },
+      "hints": ["Divide both parts by their greatest common factor, 6."],
+      "explanation": "6 ÷ 6 = 1 and 12 ÷ 6 = 2. The simplest form is 1/2."
+    },
+    {
+      "id": "match-values", "revision": "1", "type": "matching",
+      "prompt": "Match each fraction to its simplest form.", "skills": ["fractions.simplification"], "points": 3,
+      "left": [{ "id": "l1", "label": "2/4" }, { "id": "l2", "label": "2/6" }, { "id": "l3", "label": "6/8" }],
+      "right": [{ "id": "r1", "label": "1/3" }, { "id": "r2", "label": "3/4" }, { "id": "r3", "label": "1/2" }],
+      "answer": { "pairs": { "l1": "r3", "l2": "r1", "l3": "r2" }, "scoring": "partial" },
+      "explanation": "Divide both parts by a common factor: 2/4 = 1/2, 2/6 = 1/3, and 6/8 = 3/4."
+    },
+    {
+      "id": "order-simplification", "revision": "1", "type": "ordering",
+      "prompt": "Put the steps for simplifying 6/12 in order.", "skills": ["fractions.simplification"], "points": 1,
+      "items": [{ "id": "divide", "label": "Divide both parts by 6." }, { "id": "write", "label": "Write the result as 1/2." }, { "id": "find", "label": "Find the greatest common factor of 6 and 12: 6." }],
+      "answer": { "itemIds": ["find", "divide", "write"] },
+      "explanation": "Find the common factor first, divide both parts, then write the simplified fraction."
+    },
+    {
+      "id": "explain-equivalence", "revision": "1", "type": "reflection",
+      "prompt": "Explain why multiplying both parts of a fraction by 2 keeps its value the same.",
+      "skills": ["fractions.equivalence"], "points": 1,
+      "explanation": "This written response is saved for review and does not change your score."
+    }
+  ]
+}
