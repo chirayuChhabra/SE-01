@@ -8,6 +8,8 @@ Working concept and proposed product direction · 30 October 2026
 
 We assume teachers can access internet during preparation; the challenge brief does not guarantee this. The proposed first platform is a responsive, installable web app, subject to target-device testing. No application has been implemented yet.
 
+Start with the [team implementation plan](PLAN.md) for build order, engine features, ownership, and completion checklists.
+
 Read the detailed proposals in this order:
 
 1. [Product plan](docs/product-plan.md) — experiences, lifecycle, connectivity, and scope.
